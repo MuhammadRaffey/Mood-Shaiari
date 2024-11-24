@@ -13,48 +13,48 @@ export default function PoetryPage() {
   const [copied, setCopied] = useState(false);
 
   const moods = [
-    { 
-      label: "Khush (Happy)", 
+    {
+      label: "Khush (Happy)",
       emoji: "✨",
       image: "/api/placeholder/800/600",
-      gradient: "from-yellow-400 to-orange-500"
+      gradient: "from-yellow-400 to-orange-500",
     },
-    { 
-      label: "Udaas (Sad)", 
+    {
+      label: "Udaas (Sad)",
       emoji: "🌧️",
       image: "/api/placeholder/800/600",
-      gradient: "from-blue-400 to-indigo-500"
+      gradient: "from-blue-400 to-indigo-500",
     },
-    { 
-      label: "Pur Sukoon (Calm)", 
+    {
+      label: "Pur Sukoon (Calm)",
       emoji: "🌊",
       image: "/api/placeholder/800/600",
-      gradient: "from-teal-400 to-emerald-500"
+      gradient: "from-teal-400 to-emerald-500",
     },
-    { 
-      label: "Gussa (Angry)", 
+    {
+      label: "Gussa (Angry)",
       emoji: "⚡",
       image: "/api/placeholder/800/600",
-      gradient: "from-red-400 to-rose-500"
+      gradient: "from-red-400 to-rose-500",
     },
-    { 
-      label: "Pyaar (Love)", 
+    {
+      label: "Pyaar (Love)",
       emoji: "💝",
       image: "/api/placeholder/800/600",
-      gradient: "from-pink-400 to-purple-500"
+      gradient: "from-pink-400 to-purple-500",
     },
-    { 
-      label: "Nirvana (Blissful)", 
+    {
+      label: "Nirvana (Blissful)",
       emoji: "🌸",
       image: "/api/placeholder/800/600",
-      gradient: "from-indigo-400 to-pink-600"
-    }
+      gradient: "from-indigo-400 to-pink-600",
+    },
   ];
 
   const poetryStyles = [
     { name: "Ghazal", description: "Classical form with rhyming couplets" },
     { name: "Nazm", description: "Free-flowing modern verse" },
-    { name: "Haiku", description: "Brief three-line poems" }
+    { name: "Haiku", description: "Brief three-line poems" },
   ];
 
   const fetchPoem = async () => {
@@ -75,7 +75,12 @@ export default function PoetryPage() {
         setError(data.error || "Failed to generate poem");
       }
     } catch (error) {
-      setError("An error occurred");
+      const unknownError = error as unknown;
+      const errorMessage =
+        unknownError instanceof Error
+          ? unknownError.message
+          : String(unknownError);
+      setError(`An error occurred: ${errorMessage}`);
     } finally {
       setLoading(false);
     }
@@ -110,7 +115,9 @@ export default function PoetryPage() {
             <div className="absolute inset-0 bg-opacity-60 bg-gradient-to-t from-black to-transparent" />
             <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
               <span className="text-5xl mb-4">{moodOption.emoji}</span>
-              <h3 className="text-3xl font-bold text-white mb-2">{moodOption.label}</h3>
+              <h3 className="text-3xl font-bold text-white mb-2">
+                {moodOption.label}
+              </h3>
             </div>
           </div>
         </button>
@@ -131,7 +138,9 @@ export default function PoetryPage() {
         >
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-2xl font-semibold text-white mb-2">{style.name}</h3>
+              <h3 className="text-2xl font-semibold text-white mb-2">
+                {style.name}
+              </h3>
               <p className="text-gray-300 text-lg">{style.description}</p>
             </div>
             <div className="opacity-0 group-hover:opacity-100 transition-opacity">
@@ -146,13 +155,15 @@ export default function PoetryPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent_50%)]" />
-      
+
       <div className="relative min-h-screen flex flex-col items-center justify-center p-8">
         <div className="text-center mb-16 space-y-4">
           <h1 className="text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-600">
             Poetry Generator
           </h1>
-          <p className="text-gray-300 text-xl">Transform your emotions into verses with ease</p>
+          <p className="text-gray-300 text-xl">
+            Transform your emotions into verses with ease
+          </p>
         </div>
 
         {step === 1 && renderMoodSelection()}
@@ -163,7 +174,9 @@ export default function PoetryPage() {
             <div className="backdrop-blur-xl bg-white/10 rounded-3xl p-8 shadow-2xl">
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-3xl font-semibold text-white">Your Poem</h2>
+                  <h2 className="text-3xl font-semibold text-white">
+                    Your Poem
+                  </h2>
                   <div className="flex gap-3">
                     <button
                       onClick={handleCopy}
@@ -172,14 +185,20 @@ export default function PoetryPage() {
                       <Copy className="w-6 h-6 text-white" />
                     </button>
                     <button
-                      onClick={() => window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(poem)}`)}
+                      onClick={() =>
+                        window.open(
+                          `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+                            poem
+                          )}`
+                        )
+                      }
                       className="p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
                     >
                       <Share2 className="w-6 h-6 text-white" />
                     </button>
                   </div>
                 </div>
-                
+
                 <p className="text-xl leading-relaxed text-gray-100 whitespace-pre-line text-center">
                   {poem}
                 </p>
