@@ -5,11 +5,11 @@ import { Sparkles, Copy, Share2 } from "lucide-react";
 
 export default function PoetryPage() {
   const [step, setStep] = useState(1);
-  const [mood, setMood] = useState(null);
-  const [poetryStyle, setPoetryStyle] = useState(null);
-  const [poem, setPoem] = useState(null);
+  const [mood, setMood] = useState<string | null>(null);
+  const [poetryStyle, setPoetryStyle] = useState<string | null>(null);
+  const [poem, setPoem] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
   const moods = [
@@ -67,19 +67,19 @@ export default function PoetryPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ mood, poetryStyle }),
       });
-      const data = await response.json();
-      if (response.ok) {
-        setPoem(data.poem);
-        setStep(3);
-      } else {
-        setError(data.error || "Failed to generate poem");
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        setError(errorData.error || "Failed to generate poem");
+        return;
       }
+
+      const data = await response.json();
+      setPoem(data.poem);
+      setStep(3);
     } catch (error) {
-      const unknownError = error as unknown;
       const errorMessage =
-        unknownError instanceof Error
-          ? unknownError.message
-          : String(unknownError);
+        error instanceof Error ? error.message : "Unknown error occurred";
       setError(`An error occurred: ${errorMessage}`);
     } finally {
       setLoading(false);
@@ -87,15 +87,15 @@ export default function PoetryPage() {
   };
 
   const handleCopy = async () => {
-    if (poem) {
-      try {
-        await navigator.clipboard.writeText(poem); // Ensure we use await for async clipboard operation
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      } catch (error) {
-        console.error("Failed to copy text: ", error);
-        setError("Failed to copy text.");
-      }
+    if (!poem) return;
+
+    try {
+      await navigator.clipboard.writeText(poem);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      console.error("Failed to copy text: ", error);
+      setError("Failed to copy text.");
     }
   };
 
@@ -180,18 +180,22 @@ export default function PoetryPage() {
                   <div className="flex gap-3">
                     <button
                       onClick={handleCopy}
+                      aria-label="Copy poem to clipboard"
                       className="p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
                     >
                       <Copy className="w-6 h-6 text-white" />
                     </button>
                     <button
                       onClick={() =>
+                        poem &&
                         window.open(
                           `https://twitter.com/intent/tweet?text=${encodeURIComponent(
                             poem
-                          )}`
+                          )}`,
+                          "_blank"
                         )
                       }
+                      aria-label="Share poem on Twitter"
                       className="p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
                     >
                       <Share2 className="w-6 h-6 text-white" />
@@ -206,6 +210,8 @@ export default function PoetryPage() {
             </div>
           </div>
         )}
+
+        {loading && <p className="text-white">Loading...</p>}
 
         {error && (
           <div className="mt-6 p-4 bg-red-500/20 text-red-200 rounded-lg max-w-md text-center">
