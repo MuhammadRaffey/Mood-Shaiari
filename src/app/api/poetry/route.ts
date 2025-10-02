@@ -14,7 +14,7 @@ const openai = new OpenAI({
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    const { mood } = await request.json();
+    const { mood, poetryStyle } = await request.json();
 
     if (!mood) {
       return NextResponse.json(
@@ -23,6 +23,22 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
+    if (!poetryStyle) {
+      return NextResponse.json(
+        { error: "Poetry style is required in the request body." },
+        { status: 400 }
+      );
+    }
+
+    // Define style-specific instructions
+    const styleInstructions: Record<string, string> = {
+      Ghazal:
+        "Compose a beautiful Ghazal with 4 couplets (sher). Each couplet should have the same rhyme scheme and refrain. Write in Urdu script with deep emotional resonance.",
+      Nazm: "Write a modern Nazm (free verse) poem with 8-10 lines. It should have a flowing narrative structure in Urdu script, expressing the mood with vivid imagery.",
+      Haiku:
+        "Create 3 Haiku-style poems in Urdu, each with 3 short lines capturing a moment related to the mood. Keep them brief and impactful.",
+    };
+
     const messages: Array<{
       role: "system" | "user" | "assistant";
       content: string;
@@ -30,14 +46,15 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       {
         role: "system",
         content:
-          "You are an expert Urdu poet skilled in writing long, elaborate, and emotionally resonant poems. " +
-          "You should always respond with poetry inspired by classical and modern Urdu styles, " +
-          "and include at least 8 lines of poetry. Frame the poetry in Urdu " +
-          "and explain the context of the mood before starting the poem.",
+          "You are an expert Urdu poet skilled in writing emotionally resonant poetry. " +
+          "You should respond with authentic Urdu poetry in proper Urdu script. " +
+          "Focus on the mood and style requested, using classical and modern techniques as appropriate.",
       },
       {
         role: "user",
-        content: `My mood is ${mood}. Please compose exactly 4 sher (couplets) and no more, keeping it concise.`,
+        content: `My mood is ${mood}. ${
+          styleInstructions[poetryStyle] || styleInstructions.Ghazal
+        } Make it authentic and beautiful.`,
       },
     ];
 
