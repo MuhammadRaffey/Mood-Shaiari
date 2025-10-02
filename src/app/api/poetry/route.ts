@@ -42,7 +42,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     ];
 
     const response = await openai.chat.completions.create({
-      model: "llama3-70b-8192",
+      model: "openai/gpt-oss-120b",
       messages,
       temperature: 0.2,
     });
